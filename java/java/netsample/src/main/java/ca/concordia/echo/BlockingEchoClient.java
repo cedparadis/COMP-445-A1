@@ -50,7 +50,17 @@ public class BlockingEchoClient {
         }
     	
     }
+    
+    
+    
+    /*
+     * Send a get request method
+     * -open connection
+     * -set socket with socket address
+     * -
+     */
 
+    
     private static void runClient(SocketAddress endpoint) throws IOException {
         try (SocketChannel socket = SocketChannel.open()) {
             socket.connect(endpoint);
@@ -59,7 +69,8 @@ public class BlockingEchoClient {
             Socket socket1 = new Socket("httpbin.org", 80);
             PrintStream out = new PrintStream( socket1.getOutputStream() );
             BufferedReader in = new BufferedReader( new InputStreamReader( socket1.getInputStream() ) );
-            out.println( "GET /status/418 HTTP/1.0" );
+            out.println( "GET /get?assignment=1 HTTP/1.0" );
+            out.println();
             out.println();
             String line = in.readLine();
             while( line != null )
@@ -80,7 +91,7 @@ public class BlockingEchoClient {
     }
 
     public static void main(String[] args) throws IOException {
-        OptionParser parser = new OptionParser();
+       /* OptionParser parser = new OptionParser();
         parser.acceptsAll(asList("host", "h"), "EchoServer hostname")
                 .withOptionalArg()
                 .defaultsTo("httpbin.org");
@@ -94,8 +105,8 @@ public class BlockingEchoClient {
         String host = (String) opts.valueOf("host");
         System.out.println(host);
         int port = Integer.parseInt((String) opts.valueOf("port"));
-
-        SocketAddress endpoint = new InetSocketAddress(host, port);
+*/
+        SocketAddress endpoint = new InetSocketAddress("httpbin.org", 80);
         runClient(endpoint);
     }
 }
