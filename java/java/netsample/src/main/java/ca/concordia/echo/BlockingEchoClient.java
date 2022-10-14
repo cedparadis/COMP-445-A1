@@ -209,7 +209,7 @@ public class BlockingEchoClient {
 		Map<String,String> body = new HashMap<String,String>();
 		try {
 			
-			BufferedReader in = new BufferedReader(new FileReader(file));
+			BufferedReader in = new BufferedReader(new FileReader("C:/Users/Cedric Paradis/Documents/postTest.txt"));
 			String line ="";
 			line = in.readLine();
 			while (line!= null) {
@@ -220,7 +220,7 @@ public class BlockingEchoClient {
 			in.close();
 			
 		}catch(Exception e) {
-			System.err.println("File does not exist");
+			//System.err.println("File does not exist");
 			e.printStackTrace();
 		}
 		
@@ -239,7 +239,7 @@ public class BlockingEchoClient {
         if(headers == null) {
         	out.println("User-Agent: " + USER_AGENT);
         	out.println("Accept-language: " + ACCEPT_LANG);
-        	out.println("Content-type: " + "text/html");
+        	out.println("Content-type: " + "application/json");
         	out.println("Host: " + host);
         	
         }
@@ -333,7 +333,7 @@ public class BlockingEchoClient {
     	String param =("{\"Assignment\":1, \"Course\":5}");
     	//param = null;
         //sendGET("http://httpbin.org/get?course=networking&assignment=1", false, headers);
-    	File file = new File("postTest.txt");
+    	File file = new File("C:/Users/Cedric Paradis/Documents/postTest.txt");
         sendPOST("http://httpbin.org/post", false, headers, file);
     }
 }
