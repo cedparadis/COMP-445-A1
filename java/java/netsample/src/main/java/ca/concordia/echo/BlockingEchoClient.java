@@ -2,11 +2,13 @@ package ca.concordia.echo;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 public class BlockingEchoClient {
@@ -194,7 +196,7 @@ public class BlockingEchoClient {
         socket1.close();
    }
     //overload of post for file
-    private static void sendPOST(String testUrl, boolean verbose, Map<String,String> headers, File inlineData) throws IOException{
+    private static void sendPOST(String testUrl, boolean verbose, Map<String,String> headers, File file) throws IOException{
     	//put in URL to parse elements
 		URL url = new URL(testUrl);
 		String host = url.getHost();
@@ -202,6 +204,27 @@ public class BlockingEchoClient {
 		String param = url.getQuery();
 		int port = url.getPort() != -1 ? url.getPort():url.getDefaultPort();
 		System.out.println("host: " + host + "\nPath: " + path + "\nPort: " + port);
+		
+		//put the content of the file in a hashmap
+		Map<String,String> body = new HashMap<String,String>();
+		try {
+			
+			BufferedReader in = new BufferedReader(new FileReader(file));
+			String line ="";
+			line = in.readLine();
+			while (line!= null) {
+				String parts[] = line.split(":");
+				body.put(parts[0], parts[1]);
+				line = in.readLine();
+			}
+			in.close();
+			
+		}catch(Exception e) {
+			System.err.println("File does not exist");
+			e.printStackTrace();
+		}
+		
+		
 		
 		//open socket to connect to server 
 		//initialize output buffer to send request
@@ -221,29 +244,35 @@ public class BlockingEchoClient {
         	
         }
         else {
+        	out.println("{");
         	for(String key: headers.keySet()) {
-        		out.println(key +": " + headers.get(key));
+        		out.println(key +":" + headers.get(key));
         	}
+        	out.println("}");
         }
         
         //set the body of the request
        
-        if(inlineData == null) {
+        if(body.keySet().isEmpty()) {
         	out.println("Content-length: 0");
         	out.println();
         	out.println("");
         }
+        
         else {
-        	out.println("Content-length: " + inlineData.length());
+        	out.println("Content-length: 20");
         	out.println();
-        	
-            out.println(inlineData);
-        	
+        	for(String key: body.keySet()) {
+        		out.println(key +":" + body.get(key));
+        	}
+           	
         }
         
         
         out.println();
         out.println();
+        
+        //Output the response
         String line = in.readLine();
         
         //do not show response header
@@ -304,7 +333,8 @@ public class BlockingEchoClient {
     	String param =("{\"Assignment\":1, \"Course\":5}");
     	//param = null;
         //sendGET("http://httpbin.org/get?course=networking&assignment=1", false, headers);
-        sendPOST("http://httpbin.org/post", false, headers, param);
+    	File file = new File("postTest.txt");
+        sendPOST("http://httpbin.org/post", false, headers, file);
     }
 }
 
