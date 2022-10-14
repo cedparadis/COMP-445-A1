@@ -23,6 +23,7 @@ public class BlockingEchoClient {
      * -close connection
      * 
      */
+ 
 
     
     private static void sendGET(String testUrl, boolean verbose, Map<String,String>headers) throws IOException {
@@ -43,12 +44,12 @@ public class BlockingEchoClient {
             BufferedReader in = new BufferedReader( new InputStreamReader( socket1.getInputStream() ) );
             
             //send the get request with parameters
-            if(path!= null) {
+            if(param!= null) {
             	out.println( "GET "+ path + "?"+ param + " HTTP/1.0" );
             }
             //without parameters
             else {
-            	out.println( "GET "+ path + " HTTP/1.0" );
+            	out.println( "POST "+ path + " HTTP/1.0" );
             }
             if(headers == null) {
             	out.println("User-Agent: " + USER_AGENT);
@@ -98,7 +99,78 @@ public class BlockingEchoClient {
             socket1.close();
        }
         
-     
+    private static void sendPOST(String testUrl, boolean verbose, Map<String,String>headers) throws IOException{
+    	//put in URL to parse elements
+		URL url = new URL(testUrl);
+		String host = url.getHost();
+		String path = url.getPath();
+		String param = url.getQuery();
+		int port = url.getPort() != -1 ? url.getPort():url.getDefaultPort();
+		System.out.println("host: " + host + "\nPath: " + path + "\nPort: " + port);
+		
+		//open socket to connect to server 
+		//initialize output buffer to send request
+		//initialize input buffer to receive response
+        Socket socket1 = new Socket(host, port);
+        PrintStream out = new PrintStream( socket1.getOutputStream() );
+        BufferedReader in = new BufferedReader( new InputStreamReader( socket1.getInputStream() ) );
+        
+        //send the get request with parameters
+        	out.println( "POST "+ path + " HTTP/1.0" );
+        
+        if(headers == null) {
+        	out.println("User-Agent: " + USER_AGENT);
+        	out.println("Accept-language: " + ACCEPT_LANG);
+        	out.println("Content-type: " + "text/html");
+        	out.println("Host: " + host);
+        	out.println("Content-length: 18");
+        	out.println();
+        	out.println("{\"Assignment\":1}");
+        }
+        else {
+        	for(String key: headers.keySet()) {
+        		out.println(key +": " + headers.get(key));
+        	}
+        }
+        out.println();
+        out.println();
+        String line = in.readLine();
+        
+        //do not show response header
+        if(!verbose) 
+        {
+        while( line != null )
+        {
+        	//condition to not show the response header we skip until we reach two empty lines
+        	if(line.isEmpty() ) {
+        		while(line!= null) {
+        			if(line.isEmpty()) {
+        				line = in.readLine();
+        				continue;
+        			}
+        			 System.out.println( line );
+                     line = in.readLine();
+        		}
+        	}
+        	line = in.readLine();	
+           
+       } 
+        }
+        
+        //show response header
+        else if(verbose){
+        	while(line != null) {
+        		System.out.println( line );
+                line = in.readLine();
+        	}
+        }
+     // Close our streams
+        in.close();
+        out.close();
+        socket1.close();
+   }
+		
+    
     
 
     public static void main(String[] args) throws IOException {
@@ -118,7 +190,8 @@ public class BlockingEchoClient {
         int port = Integer.parseInt((String) opts.valueOf("port"));
 */
     	Map<String,String>headers = null;
-        sendGET("http://httpbin.org/get?course=networking&assignment=1", false, headers);
+        //sendGET("http://httpbin.org/get?course=networking&assignment=1", false, headers);
+        sendPOST("http://httpbin.org/post", true, headers);
     }
 }
 
