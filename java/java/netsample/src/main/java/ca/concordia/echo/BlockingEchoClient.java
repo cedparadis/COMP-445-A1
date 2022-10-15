@@ -54,12 +54,12 @@ public class BlockingEchoClient {
             else {
             	out.println( "POST "+ path + " HTTP/1.0" );
             }
-            if(headers == null) {
+            
             	out.println("User-Agent: " + USER_AGENT);
             	out.println("Accept-language: " + ACCEPT_LANG);
             	out.println("Host: " + host);
-            }
-            else {
+            
+            if(headers!= null) {
             	for(String key: headers.keySet()) {
             		out.println(key +": " + headers.get(key));
             	}
@@ -117,7 +117,7 @@ public class BlockingEchoClient {
 		String path = url.getPath();
 		String param = url.getQuery();
 		int port = url.getPort() != -1 ? url.getPort():url.getDefaultPort();
-		System.out.println("host: " + host + "\nPath: " + path + "\nPort: " + port);
+		//System.out.println("host: " + host + "\nPath: " + path + "\nPort: " + port);
 		
 		//open socket to connect to server 
 		//initialize output buffer to send request
@@ -129,14 +129,14 @@ public class BlockingEchoClient {
         //send the get request with parameters
         	out.println( "POST "+ path + " HTTP/1.0" );
         
-        if(headers == null) {
+        
         	out.println("User-Agent: " + USER_AGENT);
         	out.println("Accept-language: " + ACCEPT_LANG);
-        	out.println("Content-type: " + "text/html");
+        	//out.println("Content-type: " + "text/html");
         	out.println("Host: " + host);
         	
-        }
-        else {
+        
+        if(headers != null) {
         	for(String key: headers.keySet()) {
         		out.println(key +": " + headers.get(key));
         	}
@@ -203,7 +203,7 @@ public class BlockingEchoClient {
 		String path = url.getPath();
 		String param = url.getQuery();
 		int port = url.getPort() != -1 ? url.getPort():url.getDefaultPort();
-		System.out.println("host: " + host + "\nPath: " + path + "\nPort: " + port);
+		//System.out.println("host: " + host + "\nPath: " + path + "\nPort: " + port);
 		
 		//put the content of the file in a hashmap
 		//Map<String,String> body = new HashMap<String,String>();
@@ -222,7 +222,7 @@ public class BlockingEchoClient {
 			in.close();
 			
 		}catch(Exception e) {
-			//System.err.println("File does not exist");
+			System.err.println(e.getMessage());
 			e.printStackTrace();
 		}
 		
@@ -238,19 +238,19 @@ public class BlockingEchoClient {
         //send the get request with parameters
         	out.println( "POST "+ path + " HTTP/1.0" );
         
-        if(headers == null) {
+       
         	out.println("User-Agent: " + USER_AGENT);
         	out.println("Accept-language: " + ACCEPT_LANG);
-        	out.println("Content-type: " + "application/json");
+        	//out.println("Content-type: " + "application/json");
         	out.println("Host: " + host);
         	
-        }
-        else {
-        	out.println("{");
+        
+        if(headers != null) {
+        	
         	for(String key: headers.keySet()) {
         		out.println(key +":" + headers.get(key));
         	}
-        	out.println("}");
+        	
         }
         
         //set the body of the request
@@ -318,28 +318,16 @@ public class BlockingEchoClient {
     
 
     public static void main(String[] args) throws IOException {
-       /* OptionParser parser = new OptionParser();
-        parser.acceptsAll(asList("host", "h"), "EchoServer hostname")
-                .withOptionalArg()
-                .defaultsTo("httpbin.org");
-
-        parser.acceptsAll(asList("port", "p"), "EchoServer listening port")
-                .withOptionalArg()
-                .defaultsTo("80");
-
-        OptionSet opts = parser.parse(args);
-
-        String host = (String) opts.valueOf("host");
-        System.out.println(host);
-        int port = Integer.parseInt((String) opts.valueOf("port"));
-*/
-    	Map<String,String>headers = null;
+      
+    	Map<String,String>headers = new HashMap<String,String>();
+    	
+    	headers.put("Accept-Language", "fr");
     	
     	String param =("{\"Assignment\":1, \"Course\":5}");
     	//param = null;
-        //sendGET("http://httpbin.org/get?course=networking&assignment=1", false, headers);
+        sendGET("http://httpbin.org/get?course=networking&assignment=1", false, headers);
     	File file = new File("C:/Users/Cedric Paradis/Documents/postTest.txt");
-        sendPOST("http://httpbin.org/post", false, headers, file);
+        sendPOST("http://httpbin.org/post", true, headers, file);
     }
 }
 
