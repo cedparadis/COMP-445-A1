@@ -59,12 +59,7 @@ public class BlockingEchoClient {
             else {
             	out.println( "POST "+ path + " HTTP/1.0" );
             }
-            if(headers == null) {
-            	out.println("User-Agent: " + USER_AGENT);
-            	out.println("Accept-language: " + ACCEPT_LANG);
-            	out.println("Host: " + host);
-            }
-            else {
+            if(headers != null) {
             	for(String key: headers.keySet()) {
             		out.println(key +": " + headers.get(key));
             	}
@@ -134,14 +129,7 @@ public class BlockingEchoClient {
         //send the get request with parameters
         	out.println( "POST "+ path + " HTTP/1.0" );
         
-        if(headers == null) {
-        	out.println("User-Agent: " + USER_AGENT);
-        	out.println("Accept-language: " + ACCEPT_LANG);
-        	out.println("Content-type: " + "text/html");
-        	out.println("Host: " + host);
-        	
-        }
-        else {
+        if(headers != null) {
         	for(String key: headers.keySet()) {
         		out.println(key +": " + headers.get(key));
         	}
@@ -225,7 +213,7 @@ public class BlockingEchoClient {
 				in.close();
 
 			} catch (Exception e) {
-				//System.err.println("File does not exist");
+				System.err.println(e.getMessage());
 				e.printStackTrace();
 			}
 
@@ -240,14 +228,7 @@ public class BlockingEchoClient {
         //send the get request with parameters
         	out.println( "POST "+ path + " HTTP/1.0" );
         
-        if(headers == null) {
-        	out.println("User-Agent: " + USER_AGENT);
-        	out.println("Accept-language: " + ACCEPT_LANG);
-        	out.println("Content-type: " + "application/json");
-        	out.println("Host: " + host);
-        	
-        }
-        else {
+        if(headers != null) {
         	out.println("{");
         	for(String key: headers.keySet()) {
         		out.println(key +":" + headers.get(key));
