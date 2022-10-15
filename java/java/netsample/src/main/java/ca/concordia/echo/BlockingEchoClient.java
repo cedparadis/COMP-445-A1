@@ -206,15 +206,17 @@ public class BlockingEchoClient {
 		System.out.println("host: " + host + "\nPath: " + path + "\nPort: " + port);
 		
 		//put the content of the file in a hashmap
-		Map<String,String> body = new HashMap<String,String>();
+		//Map<String,String> body = new HashMap<String,String>();
+		String body = "";
 		try {
 			
 			BufferedReader in = new BufferedReader(new FileReader("C:/Users/Cedric Paradis/Documents/postTest.txt"));
 			String line ="";
 			line = in.readLine();
 			while (line!= null) {
-				String parts[] = line.split(":");
-				body.put(parts[0], parts[1]);
+				//String parts[] = line.split(":");
+				//body.put(parts[0], parts[1]);
+				body += line;
 				line = in.readLine();
 			}
 			in.close();
@@ -253,19 +255,22 @@ public class BlockingEchoClient {
         
         //set the body of the request
        
-        if(body.keySet().isEmpty()) {
+       // if(body.keySet().isEmpty()) {
+        if(body.length()==0) {
         	out.println("Content-length: 0");
         	out.println();
         	out.println("");
         }
         
         else {
-        	out.println("Content-length: 20");
+        	out.println("Content-length: " + body.length());
         	out.println();
+        	out.println(body);
+        	/*
         	for(String key: body.keySet()) {
         		out.println(key +":" + body.get(key));
         	}
-           	
+           	*/
         }
         
         
