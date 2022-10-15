@@ -1,5 +1,5 @@
-package ca.concordia.echo;
-
+package main.java.ca.concordia.echo;
+import static java.util.Arrays.asList;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -9,7 +9,12 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
+
 
 public class BlockingEchoClient {
 
@@ -207,24 +212,23 @@ public class BlockingEchoClient {
 		
 		//put the content of the file in a hashmap
 		Map<String,String> body = new HashMap<String,String>();
-		try {
-			
-			BufferedReader in = new BufferedReader(new FileReader("C:/Users/Cedric Paradis/Documents/postTest.txt"));
-			String line ="";
-			line = in.readLine();
-			while (line!= null) {
-				String parts[] = line.split(":");
-				body.put(parts[0], parts[1]);
+			try {
+
+				BufferedReader in = new BufferedReader(new FileReader(file));
+				String line = "";
 				line = in.readLine();
+				while (line != null) {
+					String parts[] = line.split(":");
+					body.put(parts[0], parts[1]);
+					line = in.readLine();
+				}
+				in.close();
+
+			} catch (Exception e) {
+				//System.err.println("File does not exist");
+				e.printStackTrace();
 			}
-			in.close();
-			
-		}catch(Exception e) {
-			//System.err.println("File does not exist");
-			e.printStackTrace();
-		}
-		
-		
+
 		
 		//open socket to connect to server 
 		//initialize output buffer to send request
@@ -313,28 +317,79 @@ public class BlockingEchoClient {
     
 
     public static void main(String[] args) throws IOException {
-       /* OptionParser parser = new OptionParser();
-        parser.acceptsAll(asList("host", "h"), "EchoServer hostname")
-                .withOptionalArg()
-                .defaultsTo("httpbin.org");
+		//Create a parser and parse all the required options
+        OptionParser parser = new OptionParser();
+		//file
+        parser.acceptsAll(asList("file", "f"), "File")
+                .withOptionalArg();
+		//help
+		parser.acceptsAll(asList("h", "help"), "Help").forHelp();
+		//verbose
+		parser.acceptsAll(asList("v", "verbose"), "Verbose");
+		//header (key val)
+		OptionSpec<String> headers_arg = parser.accepts("h").withRequiredArg();
+		//inline data
+		parser.acceptsAll(asList("d", "inline-data"), "Inline data").withRequiredArg();
+		OptionSet opts = parser.parse(args);
+		List<String> list=opts.valuesOf(headers_arg);
+		HashMap<String,String> headers = null;
+		if(list.size()>0) {
+			headers = new HashMap<String, String>();
+			for (int i = 0; i < list.size(); i++) {
+				if (!(list.get(i)).contains(":")) {
+					System.out.println("Invalid format.");
+				} else {
+					System.out.println(list.get(i));
+					String str = list.get(i);
+					String[] arrOfString = str.split(":", 2);
+					String key = arrOfString[0];
+					String value = arrOfString[1];
+					headers.put(key, value);
+				}
+			}
+		}
+		System.out.println(opts.valuesOf(headers_arg));
+		String file_arg  = (String) opts.valueOf("file");
+		String inline_data_arg = (String) opts.valueOf("inline-data");
+		if(opts.has("f") && opts.has("d")){
+			System.out.println("Options d and f cannot be specified at the same time.");
+			System.exit(0);
+		}
+		boolean verbose = opts.has("v");
 
-        parser.acceptsAll(asList("port", "p"), "EchoServer listening port")
+		if(args.length == 1 && args[0].equals("help")){
+			System.out.println("httpc is a curl like application but supports HTTP protocol only");
+			System.out.println("Usage:");
+			System.out.println("httpc command [arguments]");
+			System.out.println("The commands are:");
+			System.out.println("get executes a HTTP GET request and prints the response.");
+			System.out.println("post executes a HTTP POST request and prints the response.");
+			System.out.println("help prints this screen.");
+			System.out.println("Use httpc help [command] for more information about a command.");
+			System.exit(0);
+		}
+        /*parser.acceptsAll(asList("port", "p"), "EchoServer listening port")
                 .withOptionalArg()
                 .defaultsTo("80");
 
-        OptionSet opts = parser.parse(args);
 
-        String host = (String) opts.valueOf("host");
+
+
         System.out.println(host);
-        int port = Integer.parseInt((String) opts.valueOf("port"));
-*/
-    	Map<String,String>headers = null;
-    	
+        int port = Integer.parseInt((String) opts.valueOf("port"));*/
+
+
     	String param =("{\"Assignment\":1, \"Course\":5}");
     	//param = null;
         //sendGET("http://httpbin.org/get?course=networking&assignment=1", false, headers);
-    	File file = new File("C:/Users/Cedric Paradis/Documents/postTest.txt");
-        sendPOST("http://httpbin.org/post", false, headers, file);
+
+		if(inline_data_arg.isEmpty()) {
+			File file = new File(file_arg);
+			sendPOST("http://httpbin.org/post", verbose, headers, file);
+		}
+		else{
+			sendPOST("http://httpbin.org/post", verbose, headers, inline_data_arg);
+		}
     }
 }
 
