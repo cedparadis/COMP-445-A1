@@ -299,10 +299,10 @@ public class BlockingEchoClient {
 
     public static void main(String[] args) throws IOException {
 		//Create a parser and parse all the required options
-        OptionParser parser = new OptionParser();
+		OptionParser parser = new OptionParser();
 		//file
-        parser.acceptsAll(asList("file", "f"), "File")
-                .withOptionalArg();
+		parser.acceptsAll(asList("file", "f"), "File")
+				.withOptionalArg();
 		//help
 		parser.acceptsAll(asList("h", "help"), "Help").forHelp();
 		//verbose
@@ -312,13 +312,20 @@ public class BlockingEchoClient {
 		//inline data
 		parser.acceptsAll(asList("d", "inline-data"), "Inline data").withRequiredArg();
 		OptionSet opts = parser.parse(args);
-		List<String> list=opts.valuesOf(headers_arg);
-		HashMap<String,String> headers = null;
-		if(list.size()>0) {
+		//list of headers
+		List<String> list = opts.valuesOf(headers_arg);
+		//hash map where the header keys and values will be added
+		HashMap<String, String> headers = null;
+		//check if list is not empty
+		if (list.size() > 0) {
+			//allocate headers to a non null HashMap
 			headers = new HashMap<String, String>();
 			for (int i = 0; i < list.size(); i++) {
+				//check for correct format
 				if (!(list.get(i)).contains(":")) {
-					System.out.println("Invalid format.");
+					System.out.println("Invalid format in header" +list.get(i));
+					System.exit(0);
+					//if format ok, add the key value pairs to headers
 				} else {
 					System.out.println(list.get(i));
 					String str = list.get(i);
@@ -329,48 +336,94 @@ public class BlockingEchoClient {
 				}
 			}
 		}
-		System.out.println(opts.valuesOf(headers_arg));
-		String file_arg  = (String) opts.valueOf("file");
+		//Defining file_arg and inline_data_arg to help differentiate between the two post methods
+		String file_arg = (String) opts.valueOf("file");
 		String inline_data_arg = (String) opts.valueOf("inline-data");
-		if(opts.has("f") && opts.has("d")){
+		//making sure we can't select f and d at the same time, as specified by assignment
+		if (opts.has("f") && opts.has("d")) {
 			System.out.println("Options d and f cannot be specified at the same time.");
 			System.exit(0);
 		}
 		boolean verbose = opts.has("v");
+		//help
+		if (args[0].equals("help")) {
+			if(args.length == 1) {
+				System.out.println("httpc is a curl like application but supports HTTP protocol only");
+				System.out.println("Usage:");
+				System.out.println("httpc command [arguments]");
+				System.out.println("The commands are:");
+				System.out.println("get executes a HTTP GET request and prints the response.");
+				System.out.println("post executes a HTTP POST request and prints the response.");
+				System.out.println("help prints this screen.");
+				System.out.println("Use httpc help [command] for more information about a command.");
+				System.exit(0);
+			}
+			else if(args[1].equals("get")){
+				System.out.println("usage: httpc get [-v] [-h key:value] URL\n" +
+						"Get executes a HTTP GET request for a given URL.\n" +
+						"-v Prints the detail of the response such as protocol, status, and headers.\n" +
+						"-h key:value Associates headers to HTTP Request with the format 'key:value'.\n");
+				System.exit(0);
+			}
+			else if(args[1].equals("get")){
+		System.out.println("usage: httpc post [-v] [-h key:value] [-d inline-data] [-f file] URL\n" +
+		"Post executes a HTTP POST request for a given URL with inline data or from\n" +
+		"file.\n" +
+		"-v Prints the detail of the response such as protocol, status, and headers.\n" +
+		"-h key:value Associates headers to HTTP Request with the format 'key:value'.\n" +
+		"-d string Associates an inline data to the body HTTP POST request.\n" +
+		"-f file Associates the content of a file to the body HTTP POST request.\n" +
+		"Either [-d] or [-f] can be used but not both.");
+				System.exit(0);
+			}
+			else{
+				System.out.println("Unknown command.");
+				System.exit(0);
+			}
+		}
 
-		if(args.length == 1 && args[0].equals("help")){
-			System.out.println("httpc is a curl like application but supports HTTP protocol only");
-			System.out.println("Usage:");
-			System.out.println("httpc command [arguments]");
-			System.out.println("The commands are:");
-			System.out.println("get executes a HTTP GET request and prints the response.");
-			System.out.println("post executes a HTTP POST request and prints the response.");
-			System.out.println("help prints this screen.");
-			System.out.println("Use httpc help [command] for more information about a command.");
+		//URL
+		String theURL = args[args.length-1];
+		//check if valid URL
+		if(theURL.length()<4){
+			System.out.println(theURL+ " is not a valid URL");
 			System.exit(0);
 		}
-        /*parser.acceptsAll(asList("port", "p"), "EchoServer listening port")
-                .withOptionalArg()
-                .defaultsTo("80");
-
-
-
-
-        System.out.println(host);
-        int port = Integer.parseInt((String) opts.valueOf("port"));*/
-
-
-    	String param =("{\"Assignment\":1, \"Course\":5}");
-    	//param = null;
-        //sendGET("http://httpbin.org/get?course=networking&assignment=1", false, headers);
-
-		if(inline_data_arg.isEmpty()) {
-			File file = new File(file_arg);
-			sendPOST("http://httpbin.org/post", verbose, headers, file);
-		}
 		else{
-			sendPOST("http://httpbin.org/post", verbose, headers, inline_data_arg);
+			String first4 = theURL.substring(0,4);
+			if(!first4.equals("http")) {
+				System.out.println(theURL + " is not a valid URL");
+				System.exit(0);
+			}
 		}
-    }
+		String cmd = "";
+		if (args[0].equals("get")) {
+			cmd = "get";
+		} else if (args[0].equals("post")) {
+			cmd = "post";
+		} else {
+			System.out.println("Invalid command" + args[0]);
+			System.exit(0);
+		}
+
+		String param = ("{\"Assignment\":1, \"Course\":5}");
+		//param = null;
+
+		//GET
+		if(cmd.equals("get")){
+				sendGET(theURL,verbose, headers);
+		}
+		//sendGET("http://httpbin.org/get?course=networking&assignment=1", false, headers);
+		//http://httpbin.org/post
+		//POST
+		if (cmd.equals("post")) {
+			if (inline_data_arg.isEmpty()) {
+				File file = new File(file_arg);
+				sendPOST(theURL, verbose, headers, file);
+			} else {
+				sendPOST(theURL, verbose, headers, inline_data_arg);
+			}
+		}
+	}
 }
 
