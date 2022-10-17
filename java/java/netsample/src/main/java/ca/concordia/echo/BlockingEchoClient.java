@@ -261,26 +261,25 @@ public class BlockingEchoClient {
         String line = in.readLine();
         
         //do not show response header
-        if(!verbose) 
-        {
-        while( line != null )
-        {
-        	//condition to not show the response header we skip until we reach two empty lines
-        	if(line.isEmpty() ) {
-        		while(line!= null) {
-        			if(line.isEmpty()) {
-        				line = in.readLine();
-        				continue;
-        			}
-        			 System.out.println( line );
-                     line = in.readLine();
-        		}
-        	}
-        	line = in.readLine();	
-           
-       } 
-        }
-        
+		if(!verbose)
+		{
+			while( line != null )
+			{
+				//condition to not show the response header we skip until we reach two empty lines
+				if(line.isEmpty() ) {
+					while(line!= null) {
+						if(line.isEmpty()) {
+							line = in.readLine();
+							continue;
+						}
+						System.out.println( line );
+						line = in.readLine();
+					}
+				}
+				line = in.readLine();
+
+			}
+		}
         //show response header
         else if(verbose){
         	while(line != null) {
@@ -365,7 +364,7 @@ public class BlockingEchoClient {
 						"-h key:value Associates headers to HTTP Request with the format 'key:value'.\n");
 				System.exit(0);
 			}
-			else if(args[1].equals("get")){
+			else if(args[1].equals("post")){
 		System.out.println("usage: httpc post [-v] [-h key:value] [-d inline-data] [-f file] URL\n" +
 		"Post executes a HTTP POST request for a given URL with inline data or from\n" +
 		"file.\n" +
