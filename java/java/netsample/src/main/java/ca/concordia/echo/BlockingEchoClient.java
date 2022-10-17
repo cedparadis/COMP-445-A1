@@ -199,15 +199,14 @@ public class BlockingEchoClient {
 		System.out.println("host: " + host + "\nPath: " + path + "\nPort: " + port);
 		
 		//put the content of the file in a hashmap
-		Map<String,String> body = new HashMap<String,String>();
+		String body = "";
 			try {
 
 				BufferedReader in = new BufferedReader(new FileReader(file));
 				String line = "";
 				line = in.readLine();
 				while (line != null) {
-					String parts[] = line.split(":");
-					body.put(parts[0], parts[1]);
+					body += line;
 					line = in.readLine();
 				}
 				in.close();
@@ -238,18 +237,16 @@ public class BlockingEchoClient {
         
         //set the body of the request
        
-        if(body.keySet().isEmpty()) {
+        if(body.length()==0) {
         	out.println("Content-length: 0");
         	out.println();
         	out.println("");
         }
         
         else {
-        	out.println("Content-length: 20");
+        	out.println("Content-length: " + body.length() );
         	out.println();
-        	for(String key: body.keySet()) {
-        		out.println(key +":" + body.get(key));
-        	}
+        	out.println(body);
            	
         }
         
@@ -299,6 +296,7 @@ public class BlockingEchoClient {
     public static void main(String[] args) throws IOException {
 		//Create a parser and parse all the required options
 		OptionParser parser = new OptionParser();
+		parser.acceptsAll(asList("httpc"), "HTTPC");
 		//file
 		parser.acceptsAll(asList("file", "f"), "File")
 				.withOptionalArg();
@@ -344,8 +342,15 @@ public class BlockingEchoClient {
 			System.exit(0);
 		}
 		boolean verbose = opts.has("v");
+
+		if(!args[0].equals("httpc")){
+			System.out.println("invalid command ");
+			System.exit(0);
+
+		}
+
 		//help
-		if (args[0].equals("help")) {
+		if (args[1].equals("help")) {
 			if(args.length == 1) {
 				System.out.println("httpc is a curl like application but supports HTTP protocol only");
 				System.out.println("Usage:");
@@ -357,14 +362,14 @@ public class BlockingEchoClient {
 				System.out.println("Use httpc help [command] for more information about a command.");
 				System.exit(0);
 			}
-			else if(args[1].equals("get")){
+			else if(args[2].equals("get")){
 				System.out.println("usage: httpc get [-v] [-h key:value] URL\n" +
 						"Get executes a HTTP GET request for a given URL.\n" +
 						"-v Prints the detail of the response such as protocol, status, and headers.\n" +
 						"-h key:value Associates headers to HTTP Request with the format 'key:value'.\n");
 				System.exit(0);
 			}
-			else if(args[1].equals("post")){
+			else if(args[2].equals("post")){
 		System.out.println("usage: httpc post [-v] [-h key:value] [-d inline-data] [-f file] URL\n" +
 		"Post executes a HTTP POST request for a given URL with inline data or from\n" +
 		"file.\n" +
@@ -396,14 +401,15 @@ public class BlockingEchoClient {
 			}
 		}
 		String cmd = "";
-		if (args[0].equals("get")) {
+		if (args[1].equals("get")) {
 			cmd = "get";
-		} else if (args[0].equals("post")) {
+		} else if (args[1].equals("post")) {
 			cmd = "post";
 		} else {
-			System.out.println("Invalid command" + args[0]);
+			System.out.println("Invalid command " + args[1]);
 			System.exit(0);
 		}
+
 
 		String param = ("{\"Assignment\":1, \"Course\":5}");
 		//param = null;
@@ -416,7 +422,7 @@ public class BlockingEchoClient {
 		//http://httpbin.org/post
 		//POST
 		if (cmd.equals("post")) {
-			if (inline_data_arg.isEmpty()) {
+			if (inline_data_arg == null) {
 				File file = new File(file_arg);
 				sendPOST(theURL, verbose, headers, file);
 			} else {
